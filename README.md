@@ -3,7 +3,8 @@
 Revisa en **solo lectura** el riesgo de un cambio de esquema en MongoDB, CouchDB o Cassandra y lo publica como comentario en el pull request. Si el riesgo es **CRÍTICO**, abre o actualiza una issue.
 
 - **Sin tokens que crear:** usa el `GITHUB_TOKEN` que GitHub genera solo en cada ejecución.
-- **Sin cuentas ni servidores:** instala el CLI [`schemasafe` de PyPI](https://pypi.org/project/schemasafe/) y analiza datos sintéticos (procedencia `fixture`).
+- **Análisis real:** llama a la API pública de SchemaSafe, que inspecciona bases **MongoDB y CouchDB reales** (datos sintéticos, procedencia `live`) y responde qué registros cambiarían, qué índices y validaciones dependen del campo y el comando que se ejecutaría (que **no** se ejecuta).
+- **Sin cuentas:** la demo pública no pide token. La primera ejecución puede tardar hasta un minuto mientras la API arranca.
 - **Nunca escribe en una base de datos.**
 
 ## Probarlo en 3 pasos
@@ -44,13 +45,14 @@ jobs:
 | Entrada | Por defecto | Uso |
 | --- | --- | --- |
 | `change-file` | `schema-change.json` | Archivo con el cambio propuesto |
-| `engine`, `resource`, `operation`, `field`, `target-type` | del archivo | Reemplazan los valores del archivo |
+| `engine`, `resource`, `operation`, `field`, `target-type`, `target-field` | del archivo | Reemplazan los valores del archivo |
+| `api-url` | API pública de SchemaSafe | Vacío: CLI sin red sobre datos de ejemplo (`fixture`) |
 | `pr-number` | el PR del evento | PR donde comentar |
 | `github-token` | `GITHUB_TOKEN` automático | No hace falta cambiarlo |
 | `dry-run` | `false` | `true` muestra el comentario en el log sin publicarlo |
-| `schemasafe-version` | `0.2.0` | Versión del CLI en PyPI |
+| `schemasafe-version` | `0.2.0` | Versión del CLI en PyPI (solo con `api-url` vacío) |
 
-Operaciones probadas con el CLI 0.2.0: `remove_field` (CRÍTICO), `change_type` con `target_type` (ALTO), `require_field` (MEDIO), `add_index` y `remove_index` (BAJO). Las operaciones que necesitan parámetros extra, como `rename_field`, todavía no se pueden indicar desde el CLI.
+Recursos de la demo: `demo` (1200 clientes), `orders-mixed` (800 pedidos) y `profiles-mixed` (500 perfiles), en MongoDB y CouchDB. Operaciones: `remove_field`, `rename_field` (con `target_field`), `change_type` (con `target_type`), `require_field`, `add_index` y `remove_index`.
 
 ## Parte de SchemaSafe NoSQL
 
