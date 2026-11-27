@@ -30,6 +30,14 @@ inputs:
     description: "Tipo destino para change_type. Reemplaza el valor del archivo."
     required: false
     default: ""
+  target-field:
+    description: "Nuevo nombre para rename_field. Reemplaza el valor del archivo."
+    required: false
+    default: ""
+  api-url:
+    description: "API de SchemaSafe. Por defecto, la demo pública: analiza bases MongoDB y CouchDB reales (datos sintéticos, solo lectura) sin token. Vacío: CLI sin red sobre datos de ejemplo."
+    required: false
+    default: "https://schemasafe-demo-api.proudsea-fb3b7140.westus.azurecontainerapps.io"
   pr-number:
     description: "Pull request donde comentar. Por defecto, el del evento."
     required: false
@@ -53,7 +61,8 @@ runs:
     - uses: actions/setup-python@v5
       with:
         python-version: "3.12"
-    - name: Instalar el CLI schemasafe desde PyPI
+    - name: Instalar el CLI schemasafe desde PyPI (solo sin api-url)
+      if: inputs.api-url == ''
       shell: bash
       env:
         SCHEMASAFE_VERSION: ${{ inputs.schemasafe-version }}
@@ -68,6 +77,8 @@ runs:
         INPUT_OPERATION: ${{ inputs.operation }}
         INPUT_FIELD: ${{ inputs.field }}
         INPUT_TARGET_TYPE: ${{ inputs.target-type }}
+        INPUT_TARGET_FIELD: ${{ inputs.target-field }}
+        INPUT_API_URL: ${{ inputs.api-url }}
         INPUT_PR_NUMBER: ${{ inputs.pr-number }}
         INPUT_DRY_RUN: ${{ inputs.dry-run }}
       run: python "${GITHUB_ACTION_PATH}/run_review.py"
